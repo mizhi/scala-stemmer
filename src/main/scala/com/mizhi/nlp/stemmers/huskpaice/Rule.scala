@@ -38,9 +38,9 @@ case class Rule(suffix: String, append: Option[String], intact: Boolean, nextAct
   protected val Vowels = Set('a', 'e', 'i', 'o', 'u')
   protected val VowelsAndY = Vowels + 'y'
   protected[huskpaice] def stemAcceptable(word: String): Boolean = {
-    word.head match {
+    word.headOption.fold(false)(_ match {
       case x if Vowels.contains(x) => word.length >= 2
       case x => (word.length >= 3) && (word.count(VowelsAndY) > 0)
-    }
+    })
   }
 }

@@ -14,7 +14,7 @@ class RuleSet(ruleList: List[Rule]) extends RuleExecutor {
 
   def stem(word: String): String = execute(ExecutionState(Word(word, true), None)).word.text
 
-  protected[huskpaice] def selectForEnding(s: String): Option[List[Rule]] = ruleMap.get(s.last.toString)
+  protected[huskpaice] def selectForEnding(s: String): Option[List[Rule]] = ruleMap.get(s.lastOption.getOrElse("").toString)
 
   override def execute(state: ExecutionState): ExecutionState = {
     selectForEnding(state.word.text).fold(state)(

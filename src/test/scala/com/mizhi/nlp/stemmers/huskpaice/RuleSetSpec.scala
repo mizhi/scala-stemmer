@@ -15,6 +15,10 @@ class RuleSetSpec extends UnitSpec {
     it("returns none when there is no matching rule") {
       ruleSet.selectForEnding("ar") should be(None)
     }
+
+    it("returns none when the string is empty") {
+      ruleSet.selectForEnding("") should be(None)
+    }
   }
 
   describe("execute") {
