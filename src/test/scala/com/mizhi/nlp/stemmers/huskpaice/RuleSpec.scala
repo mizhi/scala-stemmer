@@ -6,7 +6,7 @@ import org.mockito.Mockito.{doReturn, spy}
 class RuleSpec extends UnitSpec {
   val rule = Rule("suffix", None, true, stop)
 
-  describe("stem") {
+  describe("execute") {
     val state = ExecutionState(Word("asuffix", true), None)
 
     describe("when rule is applied") {
