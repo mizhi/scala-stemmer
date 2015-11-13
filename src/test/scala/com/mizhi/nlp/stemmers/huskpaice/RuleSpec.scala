@@ -105,6 +105,10 @@ class RuleSpec extends UnitSpec {
       it("returns false when length is < 2") {
         rule.stemAcceptable("a") should be(false)
       }
+
+      it("works with empty string") {
+        rule.stemAcceptable("") should be(false)
+      }
     }
 
     describe("when word starts with consonant") {
@@ -125,5 +129,4 @@ class RuleSpec extends UnitSpec {
       }
     }
   }
-
 }
