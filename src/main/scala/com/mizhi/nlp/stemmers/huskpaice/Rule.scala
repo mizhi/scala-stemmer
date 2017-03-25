@@ -5,10 +5,10 @@ import com.mizhi.nlp.stemmers.huskpaice.RuleAction.RuleAction
 case class Rule(suffix: String, append: Option[String], intact: Boolean, nextAction: RuleAction) extends RuleExecutor {
   def this(suffix: String, append: Option[String], action: RuleAction) = this(suffix, append, false, action)
 
-  override def execute(state: ExecutionState): ExecutionState = {
+  override def execute(state: StemmingState): StemmingState = {
     lazy val stemmed = applyStringTransform(state.word.text)
     if (ruleApplies(state.word) && stemAcceptable(stemmed)) {
-      ExecutionState(Word(stemmed, false), Some(nextAction))
+      StemmingState(Word(stemmed, false), Some(nextAction))
     } else {
       state
     }
@@ -40,7 +40,7 @@ case class Rule(suffix: String, append: Option[String], intact: Boolean, nextAct
   protected[huskpaice] def stemAcceptable(word: String): Boolean = {
     word.headOption.fold(false)(_ match {
       case x if Vowels.contains(x) => word.length >= 2
-      case x => (word.length >= 3) && (word.count(VowelsAndY) > 0)
+      case _ => (word.length >= 3) && (word.count(VowelsAndY) > 0)
     })
   }
 }

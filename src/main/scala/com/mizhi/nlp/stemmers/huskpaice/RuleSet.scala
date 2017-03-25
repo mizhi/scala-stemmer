@@ -1,33 +1,36 @@
 package com.mizhi.nlp.stemmers.huskpaice
 
-import scala.annotation.tailrec
-import scala.collection.immutable.{Map, List}
 import com.mizhi.nlp.stemmers.huskpaice.RuleAction._
 
-class RuleSet(ruleList: List[Rule]) extends RuleExecutor {
+import scala.annotation.tailrec
+import scala.collection.immutable.{Map, Seq}
+
+class RuleSet(rules: Seq[Rule]) extends RuleExecutor {
   // Rules are keyed on the last character of the suffix.
-  protected val ruleMap: Map[String, List[Rule]] = ruleList.groupBy(_.suffix.last.toString)
+  protected val rulesBySuffix: Map[String, Seq[Rule]] = rules.groupBy(_.suffix.last.toString)
 
   // This allows us to gracefully bottom out when we run out of potential rules to apply
   // when a given word can't be stemmed by any of the potential rules.
-  protected val nullRule = new RuleExecutor { override def execute(state: ExecutionState): ExecutionState = state.copy(nextAction = Some(stop)) }
+  protected val nullRule = new RuleExecutor {
+    override def execute(state: StemmingState): StemmingState = state.copy(nextAction = Some(stop))
+  }
 
-  def stem(word: String): String = execute(ExecutionState(Word(word, true), None)).word.text
+  def stem(word: String): String = execute(StemmingState(Word(word, true), None)).word.text
 
-  protected[huskpaice] def selectForEnding(s: String): Option[List[Rule]] = ruleMap.get(s.lastOption.getOrElse("").toString)
+  protected[huskpaice] def selectForEnding(s: String): Option[Seq[Rule]] = rulesBySuffix.get(s.lastOption.getOrElse("").toString)
 
-  override def execute(state: ExecutionState): ExecutionState = {
+  override def execute(state: StemmingState): StemmingState = {
     selectForEnding(state.word.text).fold(state)(
       executeRules(state, _) match {
-        case stemmed @ ExecutionState(_, Some(`continue`)) => execute(stemmed.copy(nextAction = None)) // rule was applied with continue
+        case stemmed @ StemmingState(_, Some(`continue`)) => execute(stemmed.copy(nextAction = None)) // rule was applied with continue
         case finalResult => finalResult // Return what we've got
       })
   }
 
   @tailrec
-  final protected[huskpaice] def executeRules(state: ExecutionState, rules: List[Rule]): ExecutionState = {
+  final protected[huskpaice] def executeRules(state: StemmingState, rules: Seq[Rule]): StemmingState = {
     rules.headOption.getOrElse(nullRule).execute(state) match {
-      case unstemmed @ ExecutionState(_, None) => executeRules(unstemmed, rules.tail) // rule did not apply, move to next rule
+      case unstemmed @ StemmingState(_, None) => executeRules(unstemmed, rules.tail) // rule did not apply, move to next rule
       case stemmed => stemmed // Rule was applied, don't try any more rules and return the result
     }
   }
