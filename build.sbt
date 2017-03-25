@@ -1,13 +1,14 @@
 import sbt.Keys._
 
-lazy val huskpaice = (project in file(".")).settings(
-  name := "huskpaice",
+lazy val scala_stemmer = (project in file(".")).settings(
+  name := "scala-stemmer",
   version := "1.0",
-  scalaVersion := "2.11.7",
+  scalaVersion := "2.12.1",
   organization := "com.mizhi.nlp.stemmers.huskpaice",
   libraryDependencies ++= Seq(
-    "org.scalatest" %% "scalatest" % "2.2.4" % "test",
-    "org.mockito" % "mockito-all" % "1.10.19"),
+    "org.scalatest" %% "scalatest" % "3.0.1" % "test",
+    "org.mockito" % "mockito-core" % "2.7.19"
+  ),
   parallelExecution in Test := true,
   initialCommands in console := "import com.mizhi.nlp.stemmers.huskpaice._"
 )

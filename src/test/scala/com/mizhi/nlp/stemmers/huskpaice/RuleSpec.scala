@@ -7,13 +7,13 @@ class RuleSpec extends UnitSpec {
   val rule = Rule("suffix", None, true, stop)
 
   describe("execute") {
-    val state = ExecutionState(Word("asuffix", true), None)
+    val state = StemmingState(Word("asuffix", true), None)
 
     describe("when rule is applied") {
       val spiedRule = spy(rule.copy(append=Some("thing")))
 
-      doReturn(true).when(spiedRule).ruleApplies(state.word)
-      doReturn(true).when(spiedRule).stemAcceptable(state.word.text)
+      doReturn(true, Array[Object](): _*).when(spiedRule).ruleApplies(state.word)
+      doReturn(true, Array[Object](): _*).when(spiedRule).stemAcceptable(state.word.text)
 
       it("removes suffix") {
         spiedRule.execute(state).word.text should be("athing")
@@ -30,7 +30,7 @@ class RuleSpec extends UnitSpec {
 
     describe("when rule is not applied") {
       val spiedRule = spy(rule.copy(append=Some("thing")))
-      doReturn(false).when(spiedRule).ruleApplies(state.word)
+      doReturn(false, Array[Object](): _*).when(spiedRule).ruleApplies(state.word)
 
       it("returns same state") {
         spiedRule.execute(state) should be(state)

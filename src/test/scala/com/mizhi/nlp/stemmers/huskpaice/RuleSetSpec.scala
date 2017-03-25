@@ -30,12 +30,12 @@ class RuleSetSpec extends UnitSpec {
     val ruleSet = RuleSet(rules:_*)
 
     it("returns unaltered stem when rules are not applicable") {
-      val es = ExecutionState(Word("foono", true), None)
+      val es = StemmingState(Word("foono", true), None)
       ruleSet.execute(es) should be(es.copy(nextAction = Some(stop)))
     }
 
     it("chains continued rules") {
-      val es = ExecutionState(Word("foobaz", true), None)
+      val es = StemmingState(Word("foobaz", true), None)
       ruleSet.execute(es) should be(es.copy(Word("foobar", false), nextAction = Some(stop)))
     }
   }
@@ -43,7 +43,7 @@ class RuleSetSpec extends UnitSpec {
 
   describe("executeRules") {
     val ruleSet = RuleSet()
-    val state = ExecutionState(Word("foo", true), None)
+    val state = StemmingState(Word("foo", true), None)
 
     it("returns stop state when there are no more rules to execute") {
       ruleSet.executeRules(state, List.empty[Rule]) should be(state.copy(nextAction = Some(stop)))
@@ -52,24 +52,24 @@ class RuleSetSpec extends UnitSpec {
     describe("returns when") {
       it("a rule applies and continues") {
         val bsRules = List(Rule("foo", Some("bar"), false, continue))
-        ruleSet.executeRules(state, bsRules) should be(ExecutionState(Word("bar", false), nextAction = Some(continue)))
+        ruleSet.executeRules(state, bsRules) should be(StemmingState(Word("bar", false), nextAction = Some(continue)))
       }
 
       it("a rule applies and stops") {
         val bsRules = List(Rule("foo", Some("bar"), false, stop))
-        ruleSet.executeRules(state, bsRules) should be(ExecutionState(Word("bar", false), nextAction = Some(stop)))
+        ruleSet.executeRules(state, bsRules) should be(StemmingState(Word("bar", false), nextAction = Some(stop)))
       }
 
       it("no rule applies") {
         val bsRules = List(Rule("nofoo", Some("bar"), false, stop))
-        ruleSet.executeRules(state, bsRules) should be(ExecutionState(Word("foo", true), nextAction = Some(stop)))
+        ruleSet.executeRules(state, bsRules) should be(StemmingState(Word("foo", true), nextAction = Some(stop)))
       }
 
       it("cycles through rules until reaches applicable rule") {
         val bsRules = List(
           Rule("dontmatch", Some("doesntmatter"), false, stop),
           Rule("foo", Some("bar"), false, stop))
-        ruleSet.executeRules(state, bsRules) should be(ExecutionState(Word("bar", false), nextAction = Some(stop)))
+        ruleSet.executeRules(state, bsRules) should be(StemmingState(Word("bar", false), nextAction = Some(stop)))
       }
     }
   }
