@@ -7,20 +7,20 @@ class RuleSpec extends UnitSpec {
   val rule = Rule("suffix", None, true, stop)
 
   describe("execute") {
-    val state = StemmingState(Word("asuffix", true), None)
+    val state = StemmingState("asuffix", true, None)
 
     describe("when rule is applied") {
       val spiedRule = spy(rule.copy(append=Some("thing")))
 
-      doReturn(true, Array[Object](): _*).when(spiedRule).ruleApplies(state.word)
-      doReturn(true, Array[Object](): _*).when(spiedRule).stemAcceptable(state.word.text)
+      doReturn(true, Array[Object](): _*).when(spiedRule).ruleApplies(state)
+      doReturn(true, Array[Object](): _*).when(spiedRule).stemAcceptable(state.word)
 
       it("removes suffix") {
-        spiedRule.execute(state).word.text should be("athing")
+        spiedRule.execute(state).word should be("athing")
       }
 
       it("sets intact to false") {
-        spiedRule.execute(state).word.intact should be(false)
+        spiedRule.execute(state).intact should be(false)
       }
 
       it("sets the nextAction to the rule's action") {
@@ -30,7 +30,7 @@ class RuleSpec extends UnitSpec {
 
     describe("when rule is not applied") {
       val spiedRule = spy(rule.copy(append=Some("thing")))
-      doReturn(false, Array[Object](): _*).when(spiedRule).ruleApplies(state.word)
+      doReturn(false, Array[Object](): _*).when(spiedRule).ruleApplies(state)
 
       it("returns same state") {
         spiedRule.execute(state) should be(state)
@@ -70,12 +70,12 @@ class RuleSpec extends UnitSpec {
   }
 
   describe("intactnessIsGood") {
-    val intactStem = Word("foo", true)
-    val modifiedStem = intactStem.copy(intact=false)
+    val intactState = StemmingState("foo", true, None)
+    val modifiedStem = intactState.copy(intact=false)
 
     describe("when rule requires the word to be intact") {
       it("is true when stem is intact") {
-        rule.intactnessIsGood(intactStem) should be(true)
+        rule.intactnessIsGood(intactState) should be(true)
       }
 
       it("is false when stem is not intact") {
@@ -84,10 +84,10 @@ class RuleSpec extends UnitSpec {
     }
 
     describe("when rule does not require the word to be intact") {
-      val modifiedRule = rule.copy(intact = false)
+      val modifiedRule = rule.copy(intactOnly = false)
 
       it("is true when stem is intact") {
-        modifiedRule.intactnessIsGood(intactStem) should be(true)
+        modifiedRule.intactnessIsGood(intactState) should be(true)
       }
 
       it("is true when stem is not intact") {

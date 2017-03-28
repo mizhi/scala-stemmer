@@ -2,13 +2,13 @@ package com.mizhi.nlp.stemmers.huskpaice
 
 import com.mizhi.nlp.stemmers.huskpaice.RuleAction.RuleAction
 
-case class Rule(suffix: String, append: Option[String], intact: Boolean, nextAction: RuleAction) extends RuleExecutor {
+case class Rule(suffix: String, append: Option[String], intactOnly: Boolean, nextAction: RuleAction) extends RuleExecutor {
   def this(suffix: String, append: Option[String], action: RuleAction) = this(suffix, append, false, action)
 
   override def execute(state: StemmingState): StemmingState = {
-    lazy val stemmed = applyStringTransform(state.word.text)
-    if (ruleApplies(state.word) && stemAcceptable(stemmed)) {
-      StemmingState(Word(stemmed, false), Some(nextAction))
+    lazy val stemmed = applyStringTransform(state.word)
+    if (ruleApplies(state) && stemAcceptable(stemmed)) {
+      StemmingState(stemmed, false, Some(nextAction))
     } else {
       state
     }
@@ -17,19 +17,21 @@ case class Rule(suffix: String, append: Option[String], intact: Boolean, nextAct
   // The original algorithm specified the transforms using a deletion amount
   // and subsequent append. This algorithm uses some of the nicer string
   // processing functions we have available these days.
-  protected[huskpaice] def applyStringTransform(stem: String): String = {
-    append.fold(stem)(stem.stripSuffix(suffix).concat)
+  protected[huskpaice] def applyStringTransform(word: String): String = {
+    append.fold(word)(word.stripSuffix(suffix).concat)
   }
 
-  protected[huskpaice] def ruleApplies(word: Word): Boolean = {
-    endingMatches(word.text) && intactnessIsGood(word)
+  protected[huskpaice] def ruleApplies(state: StemmingState): Boolean = {
+    endingMatches(state.word) && intactnessIsGood(state)
   }
 
   // A Rule only applies if the word has a matching suffix
-  protected[huskpaice] def endingMatches(stem: String) = stem.endsWith(suffix)
+  protected[huskpaice] def endingMatches(word: String) = word.endsWith(suffix)
 
   // Husk-Paice won't allow a Rule to apply if it mandates the word is intact at the start
-  protected[huskpaice] def intactnessIsGood(word: Word) = !intact || (intact && word.intact)
+  protected[huskpaice] def intactnessIsGood(state: StemmingState) = {
+    !intactOnly || (intactOnly && state.intact)
+  }
 
   // There are two oddball acceptability requirements.
   // 1. if starts with a vowel, then must contain two letters after stemming

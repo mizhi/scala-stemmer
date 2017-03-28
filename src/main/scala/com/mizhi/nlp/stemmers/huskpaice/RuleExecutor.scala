@@ -1,14 +1,11 @@
 package com.mizhi.nlp.stemmers.huskpaice
 
-case class Word(text: String, intact: Boolean)
-
 object RuleAction extends scala.Enumeration {
   type RuleAction = Value
   val continue, stop = Value
 }
-import com.mizhi.nlp.stemmers.huskpaice.RuleAction._
 
-case class StemmingState(word: Word, nextAction: Option[RuleAction])
+case class StemmingState(word: String, intact: Boolean, nextAction: Option[RuleAction.RuleAction])
 
 trait RuleExecutor {
   def execute(state: StemmingState): StemmingState
