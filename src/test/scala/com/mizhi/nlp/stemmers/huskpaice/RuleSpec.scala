@@ -6,7 +6,7 @@ import org.mockito.Mockito.{doReturn, spy}
 class RuleSpec extends UnitSpec {
   val rule = Rule("suffix", None, true, stop)
 
-  describe("execute") {
+  describe("apply") {
     val state = StemmingState("asuffix", true, None)
 
     describe("when rule is applied") {
@@ -16,15 +16,15 @@ class RuleSpec extends UnitSpec {
       doReturn(true, Array[Object](): _*).when(spiedRule).stemAcceptable(state.word)
 
       it("removes suffix") {
-        spiedRule.execute(state).word should be("athing")
+        spiedRule(state).word should be("athing")
       }
 
       it("sets intact to false") {
-        spiedRule.execute(state).intact should be(false)
+        spiedRule(state).intact should be(false)
       }
 
       it("sets the nextAction to the rule's action") {
-        spiedRule.execute(state).nextAction should be (Some(spiedRule.nextAction))
+        spiedRule(state).nextAction should be (Some(spiedRule.nextAction))
       }
     }
 
@@ -33,7 +33,7 @@ class RuleSpec extends UnitSpec {
       doReturn(false, Array[Object](): _*).when(spiedRule).ruleApplies(state)
 
       it("returns same state") {
-        spiedRule.execute(state) should be(state)
+        spiedRule(state) should be(state)
       }
     }
   }
