@@ -4,7 +4,6 @@ import com.mizhi.nlp.stemmers.huskpaice.RuleAction._
 
 import scala.collection.immutable.{Map, Seq}
 
-
 class RuleSet(rules: Seq[Rule]) {
   // Rules are keyed on the last character of the suffix.
   protected val rulesBySuffix: Map[String, Seq[Rule]] = rules.groupBy(_.suffix.last.toString)

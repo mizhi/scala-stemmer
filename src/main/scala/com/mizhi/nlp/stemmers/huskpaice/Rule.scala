@@ -1,11 +1,21 @@
 package com.mizhi.nlp.stemmers.huskpaice
 
+object RuleAction extends scala.Enumeration {
+  type RuleAction = Value
+  val continue, stop = Value
+}
 import com.mizhi.nlp.stemmers.huskpaice.RuleAction.RuleAction
+
+case class StemmingState(word: String, intact: Boolean, nextAction: Option[RuleAction.RuleAction])
+
+trait RuleExecutor {
+  def apply(state: StemmingState): StemmingState
+}
 
 case class Rule(suffix: String, append: Option[String], intactOnly: Boolean, nextAction: RuleAction) extends RuleExecutor {
   def this(suffix: String, append: Option[String], action: RuleAction) = this(suffix, append, false, action)
 
-  override def execute(state: StemmingState): StemmingState = {
+  override def apply(state: StemmingState): StemmingState = {
     lazy val stemmed = applyStringTransform(state.word)
     if (ruleApplies(state) && stemAcceptable(stemmed)) {
       StemmingState(stemmed, false, Some(nextAction))
