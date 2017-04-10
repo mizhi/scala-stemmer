@@ -5,12 +5,6 @@ import com.mizhi.nlp.stemmers.huskpaice.RuleAction._
 import scala.annotation.tailrec
 
 class Stemmer(ruleSet: RuleSet) {
-  // This allows us to gracefully bottom out when we run out of potential rules to apply
-  // when a given word can't be stemmed by any of the potential rules.
-  protected val nullRule = new RuleExecutor {
-    override def apply(state: StemmingState): StemmingState = state.copy(nextAction = Some(stop))
-  }
-
   def stem(word: String): String = selectAndApplyRules(StemmingState(word, true, None)).word
 
   final protected[huskpaice] def selectAndApplyRules(state: StemmingState): StemmingState = {
@@ -23,7 +17,7 @@ class Stemmer(ruleSet: RuleSet) {
 
   @tailrec
   final protected[huskpaice] def applyRules(state: StemmingState, rules: Seq[Rule]): StemmingState = {
-    rules.headOption.getOrElse(nullRule)(state) match {
+    rules.headOption.getOrElse(Rule.nullRule)(state) match {
       case unstemmed @ StemmingState(_, _, None) => applyRules(unstemmed, rules.tail) // rule did not apply, move to next rule
       case stemmed => stemmed // Rule was applied, don't try any more rules and return the result
     }
