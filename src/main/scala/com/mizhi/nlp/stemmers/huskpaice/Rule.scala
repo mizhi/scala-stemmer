@@ -4,7 +4,7 @@ object RuleAction extends scala.Enumeration {
   type RuleAction = Value
   val continue, stop = Value
 }
-import com.mizhi.nlp.stemmers.huskpaice.RuleAction.RuleAction
+import com.mizhi.nlp.stemmers.huskpaice.RuleAction._
 
 case class StemmingState(word: String, intact: Boolean, nextAction: Option[RuleAction.RuleAction])
 
@@ -13,8 +13,6 @@ trait RuleExecutor {
 }
 
 case class Rule(suffix: String, append: Option[String], intactOnly: Boolean, nextAction: RuleAction) extends RuleExecutor {
-  def this(suffix: String, append: Option[String], action: RuleAction) = this(suffix, append, false, action)
-
   override def apply(state: StemmingState): StemmingState = {
     lazy val stemmed = applyStringTransform(state.word)
     if (ruleApplies(state) && stemAcceptable(stemmed)) {
@@ -54,5 +52,13 @@ case class Rule(suffix: String, append: Option[String], intactOnly: Boolean, nex
       case x if Vowels.contains(x) => word.length >= 2
       case _ => (word.length >= 3) && (word.count(VowelsAndY) > 0)
     })
+  }
+}
+
+object Rule {
+  // This allows us to gracefully bottom out when we run out of potential rules to apply
+  // when a given word can't be stemmed by any of the potential rules.
+  val nullRule = new RuleExecutor {
+    override def apply(state: StemmingState): StemmingState = state.copy(nextAction = Some(stop))
   }
 }
