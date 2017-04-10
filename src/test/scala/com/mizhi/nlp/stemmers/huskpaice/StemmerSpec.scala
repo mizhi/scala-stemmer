@@ -3,6 +3,24 @@ package com.mizhi.nlp.stemmers.huskpaice
 import com.mizhi.nlp.stemmers.huskpaice.RuleAction._
 
 class StemmerSpec extends UnitSpec {
+  describe("stem") {
+    val rules = List(
+      Rule("baz", Some("foo"), false, continue),
+      Rule("foo", Some("bar"), false, stop)
+    )
+
+    val ruleSet = RuleSet(rules:_*)
+    val stemmer = Stemmer(ruleSet)
+
+    it("returns unaltered stem when rules are not applicable") {
+      stemmer.stem("foono") should equal("foono")
+    }
+
+    it("returns stemmed word when rules are applicable") {
+      stemmer.stem("foofoo") should equal("foobar")
+    }
+  }
+
   describe("selectAndApplyRules") {
     val rules = List(
       Rule("baz", Some("foo"), false, continue),
@@ -10,7 +28,7 @@ class StemmerSpec extends UnitSpec {
     )
 
     val ruleSet = RuleSet(rules:_*)
-    val stemmer = new Stemmer(ruleSet)
+    val stemmer = Stemmer(ruleSet)
 
     it("returns unaltered stem when rules are not applicable") {
       val es = StemmingState("foono", true, None)
@@ -25,7 +43,7 @@ class StemmerSpec extends UnitSpec {
 
   describe("applyRules") {
     val ruleSet = RuleSet()
-    val stemmer = new Stemmer(ruleSet)
+    val stemmer = Stemmer(ruleSet)
     val state = StemmingState("foo", true, None)
 
     it("returns stop state when there are no more rules to execute") {
